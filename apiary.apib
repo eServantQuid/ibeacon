@@ -1,0 +1,149 @@
+FORMAT: 1A
+HOST: https://eservant.quidinfo.it/ibeacons
+
+# ibeacon
+
+Questo servizio ospita gli endpoints per l'acquisizione dei dati provenienti 
+dai dispositivi presenti nell'impianto. 
+I dispositivi sono di 3 tipi:
+1.gateway. Intercetta i dispositivi che fanno advertising e storicizza il loro major minor e id impianto. L'id proprietario del gtw è il mac. Necessita di wifi o eth e alimentazione 12v
+2.simple device. È piccolo, va a batterie e può fare solo advertising. Spara continuamente il prioprio id BLE.
+3.Smartphone. Può comportarsi come advertising o ranging
+
+Il microservizio avrà 3 attori da servire:
+1.uno per la raccolta dei dati provenienti dai gtw
+2.uno per la raccolta dei dati provenienti dal ranging (smartphone)
+3.uno per le richieste provenienti dal core del centro servizi che desidera avere l'ultima posizione utile dell'utente
+I dispositivi possono essere ibeacon (advertising)
+o ranging)
+
+## Raccolta dati gateway [/gateway]
+
+### /ibeacons/gateway [POST]
++ Request (application/json)
+
+        {
+          "bdaddr" : "c1:fd:a4:3b:48:06",
+          "rssi" : -67,
+          "timestamp" : "2017-01-09T17:12:29.304Z",
+          "model" : 7,
+          "serial" : 11175,
+          "battery" : 85,
+          "ibeacon" : [
+            {
+              "uuid" : "acfd065ec3c011e39bbe1a514932ac01",
+              "major" : 0,
+              "minor" : 10375,
+              "measuredPower" : -54,
+              "accuracy" : 6.612724812700408,
+              "proximity" : "far"
+            }
+          ]
+        }
+
+
++ Response 201 (application/json)
+
+        {
+                "metadata": {
+                    "messages": []
+            },
+                "payload": {
+                    "cached": "true"
+                }
+            }
+        }
+
+## Raccolta dati ranging [/ranging]
+### /ibeacons/ranging [POST]
+
+quando uno smart entra nel raggio di azione di un ibeacon "briciola" 
+cattura la tripletta uuid,major,minor della briciola. Lo smart invia a 
+questo servizio la tripletta ed il prorpio device token
+
++ Request (application/json)
+
+         {
+              "uuid" : "acfd065ec3c011e39bbe1a514932ac01",
+              "major" : 0,
+              "minor" : 10375,
+              "measuredPower" : -54,
+              "accuracy" : 6.612724812700408,
+              "proximity" : "far"
+              "deviceToken": "ABC123456789",
+              "timestamp" : "2017-01-09T17:12:29.304Z",
+            }
+
++ Response 201 (application/json)
+    
+           {
+                "metadata": {
+                    "messages": []
+            },
+                "payload": {
+                    "cached": "true"
+                }
+            }
+        }
+
++ Response 500
+   
+    + Body
+
+            {
+              "metadata": {
+                "messages": [
+                  {
+                    "message": "Errore inserimento cache",
+                    "title": "Errore",
+                    "type": "ERROR",
+                    "target": "MODAL",
+                    "errorCode": "321"
+                  }
+            }
+
+
+## Ritorna la posizione di un device id [/position]
++ Attributes (object)
+    + device-token: ABCD1234567 (string, required) - Identificatore unico dello smart.
+    + uuid: acfd065ec3c011e39bbe1a514932ac01 (string, required) - id impianto
+    + major: 1 (number, required) - major telefono
+    + minor: 23456 (number, required) - minor telefono
+
+### /ibeacons/position [GET]
+
+restitusce la posizione del device id leggendo da tabella definitiva
+
++ Request Plain Json Message
+
+    + Headers
+
+            Accept: application/json
+
++ Response 200 (application/json)
+    
+    + Headers
+        
+            X-My-Message-Header: 42
+    
+    + Body
+          
+            {
+                "metadata": {
+                    "messages": []
+                },
+                "payload": {
+                    {
+                        "measureTS": "2017-01-04T10:59:15.538Z",
+                        "bdaddr": "fa:ab:c6:d1:7a:f3",
+                        "uuid": "acfd065ec3c011e39bbe1a514932ac01",
+                        "major": 0,
+                        "minor": 10158,
+                        "measuredPower": -62,
+                        "accuracy": 13.699544862302977,
+                        "proximity": "far"
+                    }
+                }
+            }
+
++ Response 500

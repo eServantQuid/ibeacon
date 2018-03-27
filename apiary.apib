@@ -20,25 +20,34 @@ o ranging)
 ## Raccolta dati gateway [/gateway]
 
 ### /ibeacons/gateway [POST]
+
+TODO Per ibeacon-be non servono: bdaddr, rssi, model, serial, battery e altre non qui documentate.
+
+
 + Request (application/json)
 
         {
-          "bdaddr" : "c1:fd:a4:3b:48:06",
-          "rssi" : -67,
-          "timestamp" : "2017-01-09T17:12:29.304Z",
-          "model" : 7,
-          "serial" : 11175,
-          "battery" : 85,
-          "ibeacon" : [
-            {
-              "uuid" : "acfd065ec3c011e39bbe1a514932ac01",
-              "major" : 0,
-              "minor" : 10375,
-              "measuredPower" : -54,
-              "accuracy" : 6.612724812700408,
-              "proximity" : "far"
-            }
-          ]
+            "gateway" :"00000000f36c4f32",
+            "beacons" :[
+                {
+                    "bdaddr" : "c1:fd:a4:3b:48:06",
+                    "rssi" : -67,
+                    "model" : 7,
+                    "serial" : 11175,
+                    "battery" : 85,
+                    "ibeacon" : [
+                        {
+                          "uuid" : "acfd065ec3c011e39bbe1a514932ac01",
+                          "major" : 0,
+                          "minor" : 10375,
+                          "rssiMed" : -54,
+                          "accuracy" : 6.612724812700408,
+                          "proximity" : "far",
+                          "timestamp" : "2017-01-09T17:12:29.304Z"
+                        }
+                    ]
+                }
+            ]
         }
 
 
@@ -84,7 +93,7 @@ questo servizio la tripletta ed il prorpio device token
                     "cached": "true"
                 }
             }
-        }
+        
 
 + Response 500
    
@@ -104,6 +113,7 @@ questo servizio la tripletta ed il prorpio device token
 
 
 ## Ritorna la posizione di un device id [/position]
+
 + Attributes (object)
     + device-token: ABCD1234567 (string, required) - Identificatore unico dello smart.
     + uuid: acfd065ec3c011e39bbe1a514932ac01 (string, required) - id impianto
